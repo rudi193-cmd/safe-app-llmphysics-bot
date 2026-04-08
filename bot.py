@@ -1,8 +1,8 @@
-# b17: 7922L
 import logging
 import time
 
 import praw
+from praw.exceptions import RedditAPIException
 
 import config
 from plugins.physics_define import lookup
@@ -24,13 +24,26 @@ def make_reddit() -> praw.Reddit:
     )
 
 
-def handle_comment(comment: praw.models.Comment) -> None:
+def _already_replied(comment: praw.models.Comment, me: str) -> bool:
+    """Check whether the bot has already replied to this comment."""
+    comment.refresh()
+    for reply in comment.replies:
+        if reply.author and reply.author.name == me:
+            return True
+    return False
+
+
+def handle_comment(comment: praw.models.Comment, me: str) -> None:
     body = comment.body.strip()
     if not body.lower().startswith(config.COMMAND_PREFIX):
         return
 
     term = body[len(config.COMMAND_PREFIX):].strip()
     if not term:
+        return
+
+    if _already_replied(comment, me):
+        log.info("Already replied to %s — skipping", comment.id)
         return
 
     log.info("Defining: %s (comment %s)", term, comment.id)
@@ -47,14 +60,15 @@ def handle_comment(comment: praw.models.Comment) -> None:
 
 def run() -> None:
     reddit = make_reddit()
+    me = reddit.user.me().name
     subreddit = reddit.subreddit(config.SUBREDDIT)
     log.info("Watching r/%s for '%s' commands...", config.SUBREDDIT, config.COMMAND_PREFIX)
 
     while True:
         try:
             for comment in subreddit.stream.comments(skip_existing=True):
-                handle_comment(comment)
-        except Exception as exc:
+                handle_comment(comment, me)
+        except (RedditAPIException, OSError) as exc:
             log.error("Stream error: %s — restarting in 60s", exc)
             time.sleep(60)
 

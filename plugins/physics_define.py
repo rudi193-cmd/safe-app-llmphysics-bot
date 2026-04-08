@@ -1,10 +1,11 @@
-# b17: 7922L
 import wikipediaapi
 
+import config
+
 wiki = wikipediaapi.Wikipedia(
-    language="en",
+    language=config.WIKIPEDIA_LANG,
     extract_format=wikipediaapi.ExtractFormat.WIKI,
-    user_agent="llmphysics-bot/0.1 (https://www.reddit.com/r/LLMPhysics)",
+    user_agent=config.REDDIT_USER_AGENT,
 )
 
 
@@ -15,7 +16,7 @@ def lookup(term: str, sentences: int = 3) -> str:
     if not page.exists():
         return f'No Wikipedia article found for "{term}".'
 
-    summary = " ".join(page.summary.split(". ")[:sentences])
+    summary = ". ".join(page.summary.split(". ")[:sentences])
     if not summary.endswith("."):
         summary += "."
 
