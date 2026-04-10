@@ -29,3 +29,11 @@ SUBREDDIT = os.getenv("SUBREDDIT", "LLMPhysics")
 COMMAND_PREFIX = "!define"
 WIKIPEDIA_LANG = "en"
 WIKI_SUMMARY_SENTENCES = 3
+
+# Mod digest scheduler
+MOD_DIGEST_WIKI_PAGE = os.getenv("MOD_DIGEST_WIKI_PAGE", "mod-digest")
+MOD_DIGEST_FLAIR_TEXT = os.getenv("MOD_DIGEST_FLAIR_TEXT", "Mod Post")
+MOD_DIGEST_FLAIR_ID = os.getenv("MOD_DIGEST_FLAIR_ID", "")
+# Day of week (0=Monday … 6=Sunday) and UTC hour for the weekly post
+MOD_DIGEST_POST_DAY = int(os.getenv("MOD_DIGEST_POST_DAY", "6"))   # Sunday
+MOD_DIGEST_POST_HOUR = int(os.getenv("MOD_DIGEST_POST_HOUR", "0"))  # midnight UTC

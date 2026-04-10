@@ -3,10 +3,12 @@ import logging
 import time
 
 import praw
+from apscheduler.schedulers.background import BackgroundScheduler
 from praw.exceptions import RedditAPIException
 
 import config
 from plugins.physics_define import lookup
+from plugins.mod_digest import run as run_mod_digest
 
 logging.basicConfig(
     level=logging.INFO,
@@ -65,13 +67,32 @@ def run() -> None:
     subreddit = reddit.subreddit(config.SUBREDDIT)
     log.info("Watching r/%s for '%s' commands...", config.SUBREDDIT, config.COMMAND_PREFIX)
 
-    while True:
-        try:
-            for comment in subreddit.stream.comments(skip_existing=True):
-                handle_comment(comment, me)
-        except (RedditAPIException, OSError) as exc:
-            log.error("Stream error: %s — restarting in 60s", exc)
-            time.sleep(60)
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(
+        func=lambda: run_mod_digest(reddit),
+        trigger="cron",
+        day_of_week=config.MOD_DIGEST_POST_DAY,
+        hour=config.MOD_DIGEST_POST_HOUR,
+        minute=0,
+        id="mod_digest",
+    )
+    scheduler.start()
+    log.info(
+        "mod_digest scheduled: day_of_week=%s hour=%s UTC",
+        config.MOD_DIGEST_POST_DAY,
+        config.MOD_DIGEST_POST_HOUR,
+    )
+
+    try:
+        while True:
+            try:
+                for comment in subreddit.stream.comments(skip_existing=True):
+                    handle_comment(comment, me)
+            except (RedditAPIException, OSError) as exc:
+                log.error("Stream error: %s — restarting in 60s", exc)
+                time.sleep(60)
+    finally:
+        scheduler.shutdown()
 
 
 if __name__ == "__main__":
