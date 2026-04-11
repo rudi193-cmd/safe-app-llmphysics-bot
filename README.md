@@ -101,7 +101,7 @@ npm install -g devvit
 devvit login
 ```
 
-This opens a browser window. Log in with the Reddit account that will own the app.
+This opens a browser window. Log in with the Reddit account that will own the app. This **must be an account that is a moderator** of the subreddit you want to install the bot on (it needs mod permissions to distinguish and sticky the weekly digest post).
 
 **3. Navigate to the devvit directory**
 
@@ -116,6 +116,13 @@ If this is your first time setting up the app, you must register it:
 ```bash
 npx devvit init
 ```
+
+During init, you'll be asked for an app name. A few things to know:
+
+- The name must be **globally unique** across all Devvit apps on Reddit. If `llmphysics-bot` is already taken, pick something else (e.g. `llmphysics-bot-yourname`).
+- The name you pick here **does not affect the bot's behavior** — it's just an identifier on the platform. Call it whatever you want.
+- `devvit init` will update `devvit.yaml` with the name you choose.
+- The app is registered under **whichever account you logged in with** in step 2.
 
 > **This is the step most people miss.** Running `devvit install` or `devvit upload` before `npx devvit init` will give the error: `Error: We couldn't find the app llmphysics-bot. Please run npx devvit init first.`
 
