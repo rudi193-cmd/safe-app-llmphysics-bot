@@ -1,0 +1,8 @@
+name: llmphysics-bot
+version: 0.0.1
+description: "!define bot and weekly mod digest for r/LLMPhysics"
+
+# Network access needed for Wikipedia API calls
+capabilities:
+  network:
+    - https://en.wikipedia.org
