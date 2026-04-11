@@ -1,14 +1,22 @@
 # safe-app-llmphysics-bot
 
-A Reddit bot for [r/LLMPhysics](https://www.reddit.com/r/LLMPhysics/) that responds to `!define <term>` commands with a 3-sentence Wikipedia summary and a link to the full article.
+A Reddit bot for [r/LLMPhysics](https://www.reddit.com/r/LLMPhysics/) that responds to `!define <term>` commands with a 3-sentence Wikipedia summary and a link to the full article. Also posts a weekly mod digest from a wiki page.
+
+There are **two ways to run** this bot:
+
+| Approach | Directory | Runtime | Best for |
+|---|---|---|---|
+| **Python (PRAW)** | repo root | Python 3.10+ | Self-hosted on your own machine/server |
+| **Devvit app** | `devvit/` | Node.js 18+ | Hosted on Reddit's Devvit platform (no server needed) |
+
+Pick one — they do the same thing.
 
 ---
 
 ## What It Does
 
-The bot streams comments from r/LLMPhysics in real time. When it sees a comment starting with `!define`, it queries the Wikipedia API, extracts the first three sentences of the article summary, and replies with the result.
-
-If no article is found, it says so cleanly and moves on.
+- **`!define <term>`** — Replies to comments with a short Wikipedia summary and a link.
+- **Weekly Mod Digest** — Reads a wiki page (`mod-digest`), posts the contents as a stickied mod post every Sunday at midnight UTC, and resets the page for the next week.
 
 ---
 
@@ -16,30 +24,47 @@ If no article is found, it says so cleanly and moves on.
 
 ```
 safe-app-llmphysics-bot/
-├── bot.py                  # Entry point. Reddit stream loop.
+├── bot.py                  # Python entry point. Reddit stream loop.
 ├── config.py               # Loads env vars, defines constants.
 ├── plugins/
-│   └── physics_define.py   # Wikipedia lookup logic.
+│   ├── physics_define.py   # Wikipedia lookup logic.
+│   └── mod_digest.py       # Weekly mod digest logic.
 ├── requirements.txt
 ├── .env.example
+├── devvit/                 # Devvit (Reddit-hosted) version
+│   ├── devvit.yaml         # Devvit app config
+│   ├── package.json
+│   ├── tsconfig.json
+│   └── src/
+│       └── main.ts         # All bot logic for the Devvit version
 └── .gitignore
 ```
 
 ---
 
-## Setup
+## Option A: Python (PRAW) Setup
+
+This runs the bot on your own machine. Works on Linux, macOS, and Windows.
 
 **1. Clone and enter the repo**
 
 ```bash
-git clone https://github.com/your-org/safe-app-llmphysics-bot.git
+git clone https://github.com/rudi193-cmd/safe-app-llmphysics-bot.git
 cd safe-app-llmphysics-bot
 ```
+
+On **Windows (cmd)**, the commands are the same.
 
 **2. Copy `.env.example` to `.env` and fill in your credentials**
 
 ```bash
 cp .env.example .env
+```
+
+On **Windows (cmd)**, use:
+
+```cmd
+copy .env.example .env
 ```
 
 **3. Install dependencies**
@@ -54,9 +79,68 @@ pip install -r requirements.txt
 python bot.py
 ```
 
+The bot will stream comments from r/LLMPhysics and respond to `!define` commands. Press Ctrl+C to stop.
+
 ---
 
-## Environment Variables
+## Option B: Devvit App Setup
+
+This runs the bot on Reddit's own servers using [Devvit](https://developers.reddit.com/). No server or `.env` file needed — Reddit handles authentication.
+
+**Prerequisites:** [Node.js 18+](https://nodejs.org/) must be installed.
+
+**1. Install the Devvit CLI**
+
+```bash
+npm install -g devvit
+```
+
+**2. Log in to Devvit**
+
+```bash
+devvit login
+```
+
+This opens a browser window. Log in with the Reddit account that will own the app.
+
+**3. Navigate to the devvit directory**
+
+```bash
+cd devvit
+```
+
+**4. Create/register the app on Reddit's platform**
+
+If this is your first time setting up the app, you must register it:
+
+```bash
+npx devvit init
+```
+
+> **This is the step most people miss.** Running `devvit install` or `devvit upload` before `npx devvit init` will give the error: `Error: We couldn't find the app llmphysics-bot. Please run npx devvit init first.`
+
+**5. Install dependencies**
+
+```bash
+npm install
+```
+
+**6. Test locally (optional)**
+
+```bash
+devvit playtest <your-test-subreddit>
+```
+
+**7. Upload and install**
+
+```bash
+devvit upload
+devvit install <your-subreddit>
+```
+
+---
+
+## Environment Variables (Python version only)
 
 | Variable | Required | Description |
 |---|---|---|
@@ -66,6 +150,11 @@ python bot.py
 | `REDDIT_PASSWORD` | Yes | Password of the bot account |
 | `REDDIT_USER_AGENT` | Yes | User agent string (e.g. `llmphysics-bot/0.1 by u/YourBotAccount`) |
 | `SUBREDDIT` | No | Subreddit to monitor. Defaults to `LLMPhysics` |
+| `MOD_DIGEST_WIKI_PAGE` | No | Wiki page name for digest content. Defaults to `mod-digest` |
+| `MOD_DIGEST_FLAIR_TEXT` | No | Flair text for digest posts. Defaults to `Mod Post` |
+| `MOD_DIGEST_FLAIR_ID` | No | Flair template ID (optional) |
+| `MOD_DIGEST_POST_DAY` | No | Day of week (0=Mon, 6=Sun). Defaults to `6` |
+| `MOD_DIGEST_POST_HOUR` | No | UTC hour for the digest post. Defaults to `0` |
 
 ### Getting Reddit Credentials
 
@@ -74,6 +163,8 @@ python bot.py
 3. Create a new app. Select **script** as the type.
 4. Set the redirect URI to `http://localhost:8080` (unused, but required).
 5. Copy the client ID (shown under the app name) and the client secret.
+
+The **Devvit version** does not need these credentials — Reddit handles auth automatically.
 
 ---
 
@@ -98,14 +189,19 @@ The bot replies:
 
 ## Adding Plugins
 
-New commands go in `plugins/`. Each plugin is a module with its own lookup or handler logic. `bot.py` imports from `plugins/` directly — add a new file, wire it into `handle_comment()` in `bot.py`, and it's live.
+New commands go in `plugins/` (Python version). Each plugin is a module with its own lookup or handler logic. `bot.py` imports from `plugins/` directly — add a new file, wire it into `handle_comment()` in `bot.py`, and it's live.
 
-The `physics_define` plugin is the reference implementation.
+For the Devvit version, add new triggers or scheduler jobs directly in `devvit/src/main.ts`.
 
 ---
 
 ## Dependencies
 
+**Python version:**
 - [praw](https://praw.readthedocs.io/) — Reddit API wrapper
 - [wikipedia-api](https://wikipedia-api.readthedocs.io/) — Wikipedia article fetching
 - [python-dotenv](https://pypi.org/project/python-dotenv/) — `.env` loading
+- [APScheduler](https://apscheduler.readthedocs.io/) — Cron scheduling for the weekly digest
+
+**Devvit version:**
+- [@devvit/public-api](https://developers.reddit.com/) — Reddit's Devvit SDK
