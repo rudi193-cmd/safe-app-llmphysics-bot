@@ -1,5 +1,10 @@
 import { Devvit } from '@devvit/public-api';
 
+Devvit.configure({
+  redditAPI: true,
+  http: true,
+});
+
 const COMMAND_PREFIX = '!define';
 const WIKI_PAGE = 'mod-digest';
 const BLANK_CONTENT = '_No entries this week._';
