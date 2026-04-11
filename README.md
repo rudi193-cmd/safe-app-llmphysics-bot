@@ -177,7 +177,7 @@ The **Devvit version** does not need these credentials — Reddit handles auth a
 
 ## Usage Example
 
-A user posts in r/LLMPhysics:
+A user posts a comment in the subreddit:
 
 > `!define quantum entanglement`
 
@@ -191,6 +191,24 @@ The bot replies:
 >
 > ---
 > *I'm a bot for r/LLMPhysics. Use `!define <term>` to look up a physics concept.*
+
+**Important:** The comment must **start with** `!define`. Putting text before the command (like `u/botname !define tensor` or `Okay testing again. !define quantum`) will **not** trigger the bot.
+
+---
+
+## Troubleshooting
+
+**Bot doesn't respond to `!define` commands**
+- **Python version:** Make sure `python bot.py` is running and the terminal is open. The bot only works while the process is alive.
+- **Devvit version:** Make sure you ran all three steps: `npx devvit init`, `devvit upload`, and `devvit install <subreddit-name>`. Just uploading isn't enough — you must install it on the specific subreddit.
+- Make sure the comment **starts with** `!define`. Text before the command is ignored.
+- **Testing on a different subreddit?** For the Python version, set `SUBREDDIT=your_test_sub` in `.env`. For the Devvit version, install the app on the test subreddit with `devvit install your_test_sub`.
+
+**"We couldn't find the app" error**
+- Run `npx devvit init` inside the `devvit/` directory before uploading or installing.
+
+**Bot account can't distinguish/sticky posts**
+- The bot account (or the Devvit login account) must be a **moderator** of the target subreddit.
 
 ---
 
