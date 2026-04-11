@@ -4,3 +4,7 @@ __pycache__/
 *.pyo
 .venv/
 venv/
+
+# Devvit / Node
+node_modules/
+dist/
