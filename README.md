@@ -219,13 +219,19 @@ The **Devvit version** does not need these credentials — Reddit handles auth a
 
 ---
 
-## Usage Example
+## Usage
 
-A user posts a comment in the subreddit:
+The Devvit bot accepts the `!define` command in two ways:
+
+**1. Prefix mode** — comment starts with `!define`:
 
 > `!define quantum entanglement`
 
-The bot replies:
+**2. Summon mode** — comment mentions the bot anywhere and contains `!define` anywhere:
+
+> `Hey u/llmphysics-bot, !define quantum entanglement please`
+
+Either way, the bot extracts the term and replies:
 
 > **Quantum entanglement**
 >
@@ -236,7 +242,13 @@ The bot replies:
 > ---
 > *I'm a bot for r/LLMPhysics. Use `!define <term>` to look up a physics concept.*
 
-**Important:** The comment must **start with** `!define`. Putting text before the command (like `u/botname !define tensor` or `Okay testing again. !define quantum`) will **not** trigger the bot.
+**Why two modes?** Prefix mode is concise. Summon mode lets you write a full comment that mentions the bot without forcing `!define` to be the first word — useful for replies, multi-part messages, and explaining the command in prose without accidentally triggering it (as long as you don't also mention the bot).
+
+**Term extraction:**
+- The term is whatever follows `!define` on that line, stopping at the first `.`, `?`, or newline.
+- If Wikipedia has no article for the extracted term AND the term is multiple words, the bot falls back to just the first word. So `!define cosmology Do you have any evidence?` still gets a useful reply about cosmology instead of failing silently.
+
+The bot ignores comments that contain `!define` but neither start with it nor mention the bot by username — that's what lets you write _"use the `!define` command"_ in docs without spamming the sub.
 
 ---
 
@@ -245,8 +257,15 @@ The bot replies:
 **Bot doesn't respond to `!define` commands**
 - **Python version:** Make sure `python bot.py` is running and the terminal is open. The bot only works while the process is alive.
 - **Devvit version:** Make sure you ran all three steps: `npx devvit init`, `devvit upload`, and `devvit install <subreddit-name>`. Just uploading isn't enough — you must install it on the specific subreddit.
-- Make sure the comment **starts with** `!define`. Text before the command is ignored.
+- Either start the comment with `!define`, or mention `u/<bot-username>` somewhere in the same comment.
 - **Testing on a different subreddit?** For the Python version, set `SUBREDDIT=your_test_sub` in `.env`. For the Devvit version, install the app on the test subreddit with `devvit install your_test_sub`.
+
+**Config changes on the wiki page aren't taking effect**
+- Wait up to 60 seconds (the cache) or 5 minutes (the heartbeat sync) — whichever comes first. Posting any `!define` comment will also force an immediate refresh.
+- Check the Devvit logs (`devvit logs`) for lines starting with `config loaded from`. They'll show whether the wiki page was read successfully and which values were picked up.
+
+**Cron schedule change didn't fire**
+- The bot re-reads the config and reschedules the digest job on a heartbeat every 5 minutes. If you set a cron to fire within that window, the heartbeat may not have run yet. Post a `!define` comment to force an immediate re-sync, then watch the logs for `digest: scheduled with cron "..."`.
 
 **"We couldn't find the app" error**
 - Run `npx devvit init` inside the `devvit/` directory before uploading or installing.
