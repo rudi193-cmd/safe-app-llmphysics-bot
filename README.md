@@ -145,6 +145,10 @@ devvit upload
 devvit install <your-subreddit>
 ```
 
+**8. (Optional) Set an app icon**
+
+Save a 256x256 PNG as `devvit/assets/icon.png`, uncomment the `icon:` line in `devvit/devvit.yaml`, then re-run `devvit upload`. See [`devvit/assets/README.md`](devvit/assets/README.md) for details.
+
 ---
 
 ## Runtime Config (Devvit version)
