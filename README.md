@@ -147,6 +147,34 @@ devvit install <your-subreddit>
 
 ---
 
+## Runtime Config (Devvit version)
+
+The Devvit app reads a YAML config from a **mod-only wiki page** on the subreddit it's installed on:
+
+```
+https://www.reddit.com/r/<your-sub>/wiki/mod/llmphysics-bot/config
+```
+
+Because this page lives under `mod/`, only moderators can edit it. The bot re-reads it at most once every 60 seconds, so edits take effect within about a minute — no `devvit upload` needed.
+
+**What the config controls:**
+
+- **Topic filtering** — `allowed_category_keywords` gates `!define` to Wikipedia pages whose categories contain any of these keywords (e.g. `physics`, `quantum`, `chemistry`). `!define moron` fails the check; `!define quantum entanglement` passes.
+- **Blocklist** — `blocked_terms` is a hard refuse list that runs before the category check.
+- **Mod digest** — wiki page name, cron schedule, and post title. Changing the cron reschedules the job automatically.
+- **Reply wording** — summary length, footer, and all user-facing messages (`not_found_message`, `off_topic_message`, `error_message`). Use `{term}` as a placeholder.
+
+**Setting it up:**
+
+1. Go to `https://www.reddit.com/r/<your-sub>/wiki/create/mod/llmphysics-bot/config`
+2. Paste the contents of [`devvit/config.example.yaml`](devvit/config.example.yaml)
+3. Edit any fields you want to change; leave out anything you want to keep at default
+4. Save. The bot picks up changes within 60 seconds.
+
+If the wiki page doesn't exist or can't be parsed, the bot falls back to the built-in defaults and logs a note — it will not crash.
+
+---
+
 ## Environment Variables (Python version only)
 
 | Variable | Required | Description |
