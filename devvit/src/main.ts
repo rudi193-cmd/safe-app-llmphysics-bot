@@ -82,6 +82,16 @@ function mergeConfig(base: BotConfig, over: Partial<BotConfig>): BotConfig {
   };
 }
 
+// Reddit wiki pages render markdown in the browser, which turns YAML `#`
+// comments into giant headers. Mods are expected to wrap the YAML in a
+// ```yaml ... ``` fenced code block for clean rendering. This strips that
+// fence before parsing so both fenced and unfenced configs work.
+function stripCodeFence(text: string): string {
+  const trimmed = text.trim();
+  const fenced = trimmed.match(/^```(?:ya?ml)?\s*\n([\s\S]*?)\n```$/i);
+  return fenced ? fenced[1] : trimmed;
+}
+
 // ---------------------------------------------------------------------------
 // Config loading (Redis cache, 60s TTL)
 // ---------------------------------------------------------------------------
@@ -103,7 +113,8 @@ async function loadConfig(context: Context): Promise<BotConfig> {
       subreddit.name,
       CONFIG_WIKI_PAGE,
     );
-    const parsed = parseYaml(page.content) as Partial<BotConfig> | null;
+    const raw = stripCodeFence(page.content);
+    const parsed = parseYaml(raw) as Partial<BotConfig> | null;
     if (parsed && typeof parsed === 'object') {
       config = mergeConfig(DEFAULT_CONFIG, parsed);
     }

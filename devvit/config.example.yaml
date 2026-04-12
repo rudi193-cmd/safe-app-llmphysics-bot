@@ -3,6 +3,19 @@
 # Copy this file into your subreddit's mod-only wiki page at:
 #   https://www.reddit.com/r/<your-sub>/wiki/mod/llmphysics-bot/config
 #
+# IMPORTANT: Reddit wiki pages render as markdown in the browser, which
+# turns YAML `#` comments into giant headers. To keep the page readable,
+# wrap the entire YAML in a fenced code block on the wiki page like this:
+#
+#     ```yaml
+#     allowed_category_keywords:
+#       - physics
+#       ...
+#     ```
+#
+# The bot strips the code fence before parsing, so both fenced and plain
+# YAML will work — fenced just looks nicer to humans viewing the page.
+#
 # The bot re-reads this page at most once every 60 seconds, so edits take
 # effect within about a minute. Only moderators can edit pages under `mod/`.
 #

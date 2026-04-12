@@ -167,8 +167,20 @@ Because this page lives under `mod/`, only moderators can edit it. The bot re-re
 **Setting it up:**
 
 1. Go to `https://www.reddit.com/r/<your-sub>/wiki/create/mod/llmphysics-bot/config`
-2. Paste the contents of [`devvit/config.example.yaml`](devvit/config.example.yaml)
-3. Edit any fields you want to change; leave out anything you want to keep at default
+2. Paste the contents of [`devvit/config.example.yaml`](devvit/config.example.yaml), **wrapped in a fenced code block**, like this:
+
+   <pre>
+   ```yaml
+   allowed_category_keywords:
+     - physics
+     - quantum
+     ...
+   ```
+   </pre>
+
+   This is important because Reddit wiki pages render as markdown in the browser, which turns YAML `#` comments into big headers and makes the page unreadable. Wrapping the YAML in a ` ```yaml ` code fence keeps it rendering as a clean monospace block. The bot strips the fence before parsing, so plain (unfenced) YAML also works — the fence is just for human readability.
+
+3. Edit any fields you want to change; leave out anything you want to keep at default.
 4. Save. The bot picks up changes within 60 seconds.
 
 If the wiki page doesn't exist or can't be parsed, the bot falls back to the built-in defaults and logs a note — it will not crash.
