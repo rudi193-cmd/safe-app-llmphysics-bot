@@ -22,6 +22,14 @@
 # Every field is optional — anything you leave out uses the built-in default.
 
 # ---------------------------------------------------------------------------
+# Bot identity
+# ---------------------------------------------------------------------------
+# Reddit username of the account the bot posts under. This is used to detect
+# "summon mode" invocations like `u/llmphysics-bot !define quantum` anywhere
+# in a comment. Default matches the app name on the Devvit platform.
+bot_username: llmphysics-bot
+
+# ---------------------------------------------------------------------------
 # Topic filtering
 # ---------------------------------------------------------------------------
 # When someone runs `!define <term>`, the bot looks up the Wikipedia article
