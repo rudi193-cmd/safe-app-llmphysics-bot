@@ -101,7 +101,7 @@ npm install -g devvit
 devvit login
 ```
 
-This opens a browser window. Log in with the Reddit account that will own the app.
+This opens a browser window. Log in with the Reddit account that will own the app. This **must be an account that is a moderator** of the subreddit you want to install the bot on (it needs mod permissions to distinguish and sticky the weekly digest post).
 
 **3. Navigate to the devvit directory**
 
@@ -116,6 +116,13 @@ If this is your first time setting up the app, you must register it:
 ```bash
 npx devvit init
 ```
+
+During init, you'll be asked for an app name. A few things to know:
+
+- The name must be **globally unique** across all Devvit apps on Reddit. If `llmphysics-bot` is already taken, pick something else (e.g. `llmphysics-bot-yourname`).
+- The name you pick here **does not affect the bot's behavior** — it's just an identifier on the platform. Call it whatever you want.
+- `devvit init` will update `devvit.yaml` with the name you choose.
+- The app is registered under **whichever account you logged in with** in step 2.
 
 > **This is the step most people miss.** Running `devvit install` or `devvit upload` before `npx devvit init` will give the error: `Error: We couldn't find the app llmphysics-bot. Please run npx devvit init first.`
 
@@ -137,6 +144,46 @@ devvit playtest <your-test-subreddit>
 devvit upload
 devvit install <your-subreddit>
 ```
+
+---
+
+## Runtime Config (Devvit version)
+
+The Devvit app reads a YAML config from a **mod-only wiki page** on the subreddit it's installed on:
+
+```
+https://www.reddit.com/r/<your-sub>/wiki/mod/llmphysics-bot/config
+```
+
+Because this page lives under `mod/`, only moderators can edit it. The bot re-reads it at most once every 60 seconds, so edits take effect within about a minute — no `devvit upload` needed.
+
+**What the config controls:**
+
+- **Topic filtering** — `allowed_category_keywords` gates `!define` to Wikipedia pages whose categories contain any of these keywords (e.g. `physics`, `quantum`, `chemistry`). `!define moron` fails the check; `!define quantum entanglement` passes.
+- **Blocklist** — `blocked_terms` is a hard refuse list that runs before the category check.
+- **Mod digest** — wiki page name, cron schedule, and post title. Changing the cron reschedules the job automatically.
+- **Reply wording** — summary length, footer, and all user-facing messages (`not_found_message`, `off_topic_message`, `error_message`). Use `{term}` as a placeholder.
+
+**Setting it up:**
+
+1. Go to `https://www.reddit.com/r/<your-sub>/wiki/create/mod/llmphysics-bot/config`
+2. Paste the contents of [`devvit/config.example.yaml`](devvit/config.example.yaml), **wrapped in a fenced code block**, like this:
+
+   <pre>
+   ```yaml
+   allowed_category_keywords:
+     - physics
+     - quantum
+     ...
+   ```
+   </pre>
+
+   This is important because Reddit wiki pages render as markdown in the browser, which turns YAML `#` comments into big headers and makes the page unreadable. Wrapping the YAML in a ` ```yaml ` code fence keeps it rendering as a clean monospace block. The bot strips the fence before parsing, so plain (unfenced) YAML also works — the fence is just for human readability.
+
+3. Edit any fields you want to change; leave out anything you want to keep at default.
+4. Save. The bot picks up changes within 60 seconds.
+
+If the wiki page doesn't exist or can't be parsed, the bot falls back to the built-in defaults and logs a note — it will not crash.
 
 ---
 
@@ -170,7 +217,7 @@ The **Devvit version** does not need these credentials — Reddit handles auth a
 
 ## Usage Example
 
-A user posts in r/LLMPhysics:
+A user posts a comment in the subreddit:
 
 > `!define quantum entanglement`
 
@@ -184,6 +231,24 @@ The bot replies:
 >
 > ---
 > *I'm a bot for r/LLMPhysics. Use `!define <term>` to look up a physics concept.*
+
+**Important:** The comment must **start with** `!define`. Putting text before the command (like `u/botname !define tensor` or `Okay testing again. !define quantum`) will **not** trigger the bot.
+
+---
+
+## Troubleshooting
+
+**Bot doesn't respond to `!define` commands**
+- **Python version:** Make sure `python bot.py` is running and the terminal is open. The bot only works while the process is alive.
+- **Devvit version:** Make sure you ran all three steps: `npx devvit init`, `devvit upload`, and `devvit install <subreddit-name>`. Just uploading isn't enough — you must install it on the specific subreddit.
+- Make sure the comment **starts with** `!define`. Text before the command is ignored.
+- **Testing on a different subreddit?** For the Python version, set `SUBREDDIT=your_test_sub` in `.env`. For the Devvit version, install the app on the test subreddit with `devvit install your_test_sub`.
+
+**"We couldn't find the app" error**
+- Run `npx devvit init` inside the `devvit/` directory before uploading or installing.
+
+**Bot account can't distinguish/sticky posts**
+- The bot account (or the Devvit login account) must be a **moderator** of the target subreddit.
 
 ---
 
