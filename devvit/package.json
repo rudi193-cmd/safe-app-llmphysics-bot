@@ -1,21 +1,17 @@
 {
+  "//": "Version: 0.7.24",
   "name": "llmphysics-bot",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "esbuild src/server/index.ts --bundle --platform=node --format=cjs --outfile=dist/server/index.js --watch",
-    "build": "esbuild src/server/index.ts --bundle --platform=node --format=cjs --outfile=dist/server/index.js",
+    "build": "devvit build",
     "upload": "devvit upload"
   },
   "dependencies": {
-    "@devvit/reddit": "0.12.x",
-    "@devvit/redis": "0.12.x",
-    "@devvit/web": "0.12.x",
-    "hono": "^4.0.0"
+    "@devvit/public-api": "0.12.19"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "esbuild": "^0.20.0",
-    "typescript": "5.x"
+    "devvit": "0.12.19",
+    "typescript": "5.8.3"
   }
 }

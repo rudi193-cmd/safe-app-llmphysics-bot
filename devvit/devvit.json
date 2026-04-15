@@ -8,69 +8,19 @@
     },
     "http": {
       "enable": true,
-      "domains": ["en.wikipedia.org"]
+      "domains": [
+        "en.wikipedia.org"
+      ]
     },
     "redis": true
   },
-  "server": {
-    "entry": "index.js"
-  },
-  "triggers": {
-    "onCommentSubmit": "/internal/triggers/on-comment-submit",
-    "onAppInstall": "/internal/triggers/on-app-install",
-    "onAppUpgrade": "/internal/triggers/on-app-upgrade"
-  },
-  "scheduler": {
-    "tasks": {
-      "heartbeat": {
-        "endpoint": "/internal/scheduler/heartbeat",
-        "cron": "*/5 * * * *"
-      },
-      "mod-digest": {
-        "endpoint": "/internal/scheduler/mod-digest"
-      }
-    }
-  },
-  "settings": {
-    "subreddit": {
-      "botUsername": {
-        "type": "string",
-        "label": "Bot username",
-        "defaultValue": "llmphysics-bot"
-      },
-      "allowedCategoryKeywords": {
-        "type": "string",
-        "label": "Allowed category keywords (comma-separated)",
-        "defaultValue": "physics,mathematics,chemistry,astronomy,astrophysics,quantum,relativity,mechanics,thermodynamics,cosmology,particle,science"
-      },
-      "blockedTerms": {
-        "type": "string",
-        "label": "Blocked terms (comma-separated)",
-        "defaultValue": ""
-      },
-      "digestWikiPage": {
-        "type": "string",
-        "label": "Digest wiki page name",
-        "defaultValue": "mod-digest"
-      },
-      "digestCron": {
-        "type": "string",
-        "label": "Digest schedule (cron expression)",
-        "defaultValue": "0 0 * * 0",
-        "validationEndpoint": "/internal/settings/validate-cron"
-      },
-      "digestPostTitle": {
-        "type": "string",
-        "label": "Digest post title",
-        "defaultValue": "Weekly Mod Digest"
-      },
-      "summarySentences": {
-        "type": "number",
-        "label": "Number of sentences in !define replies",
-        "defaultValue": 3,
-        "validationEndpoint": "/internal/settings/validate-sentences"
-      }
-    }
+  "blocks": {
+    "entry": "src/main_modular.ts",
+    "triggers": [
+      "onCommentSubmit",
+      "onAppInstall",
+      "onAppUpgrade"
+    ]
   },
   "marketingAssets": {
     "icon": "assets/icon.png"

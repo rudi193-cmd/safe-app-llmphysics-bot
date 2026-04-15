@@ -4,13 +4,12 @@
     "module": "CommonJS",
     "moduleResolution": "node",
     "lib": ["ES2020"],
-    "outDir": "dist/server",
-    "rootDir": "src/server",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "jsx": "react"
   },
-  "include": ["src/server/**/*.ts"],
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules"]
 }
