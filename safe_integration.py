@@ -1,8 +1,10 @@
 """SAFE Framework Integration for LLMPhysics Bot."""
 
 import os as _os
+import sqlite3 as _sqlite3
 
-_WILLOW_URL = _os.environ.get("WILLOW_URL", "http://localhost:8420")
+_STORE_ROOT = _os.path.join(_os.path.expanduser("~"), ".willow", "store")
+_STORE_ROOT = _os.environ.get("WILLOW_STORE_ROOT", _STORE_ROOT)
 _APP_ID = "safe-app-llmphysics-bot"
 
 
@@ -14,20 +16,7 @@ def get_manifest():
 
 
 def status():
-    """Health check for the Willow Pigeon bus."""
-    try:
-        import requests as _r
-        r = _r.get(f"{_WILLOW_URL}/api/pigeon/status", timeout=5)
-        data = r.json()
-        return {
-            "app_id": _APP_ID,
-            "status": "ok",
-            "willow_reachable": True,
-            "willow_status": data.get("status"),
-        }
-    except Exception:
-        return {
-            "app_id": _APP_ID,
-            "status": "ok",
-            "willow_reachable": False,
-        }
+    """Check if Willow store is reachable."""
+    db_path = _os.path.join(_STORE_ROOT, "knowledge", "store.db")
+    reachable = _os.path.exists(db_path)
+    return {"ok": reachable, "store": _STORE_ROOT, "mode": "portless"}
